@@ -80,6 +80,7 @@ export get_multiset, set_multiset!, is_active, is_halted
 export is_applicable, apply_rule
 export is_skin, is_elementary, add_child!, remove_child!
 export get_membrane, get_rules_for_membrane, get_skin_membrane, get_children, validate
+export print_trace, print_system
 export @multiset_str
 
 end # module PSystems
