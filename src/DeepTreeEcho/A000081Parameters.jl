@@ -18,15 +18,45 @@ ensuring mathematical consistency throughout the system.
 4. **Growth Rate**: Derived from ratios between consecutive A000081 terms
 5. **Mutation Rate**: Derived from diversity within tree populations
 
+# 1-1 Correspondence Principle (Critical)
+
+For a given order n, the system maintains **1-1 relationships** between:
+- **B-series roots** (rooted trees) = A000081[n]
+- **P-system membranes** (at order n) = A000081[n]
+- **J-surface differentials** (elementary differentials) = A000081[n]
+
+These three expressions of A000081 (Matula numbers) must be equal for consistency.
+
 # Parameter Derivation Rules
 
 For a given **base order** n (typically 3-7):
-- `reservoir_size = sum(A000081[1:n])` (cumulative trees up to order n)
+
+| Order | Reservoir Size | Roots/Mems/Diffs |
+|-------|----------------|------------------|
+| 1     | 1              | 1                |
+| 2     | 2              | 1                |
+| 3     | 4              | 2                |
+| 4     | 8              | 4                |
+| 5     | 17             | 9                |
+| 6     | 37             | 20               |
+| 7     | 85             | 48               |
+| 8     | 200            | 115              |
+| 9     | 486            | 286              |
+| 10    | 1205           | 719              |
+
+Where:
+- Column 2: `reservoir_size = sum(A000081[1:n])` (cumulative trees up to order n)
+- Column 3: `num_trees = A000081[n]` (number of roots/membranes/differentials at order n)
+
+Derived parameters:
 - `num_membranes = A000081[k]` where k is chosen based on structural needs
 - `growth_rate = A000081[n+1] / A000081[n]` (growth ratio)
 - `mutation_rate = 1.0 / A000081[n]` (inversely proportional to complexity)
 
 All parameters MUST be justified by their relationship to the A000081 topology.
+
+Note: Related sequences A000108 (Catalan), A000055 (unrooted trees), and 
+A000041 (partitions) may also have correspondence in advanced configurations.
 """
 module A000081Parameters
 
@@ -34,6 +64,7 @@ export A000081_SEQUENCE
 export derive_reservoir_size, derive_num_membranes, derive_growth_rate, derive_mutation_rate
 export get_parameter_set, validate_parameters, explain_parameters
 export A000081ParameterSet
+export validate_component_correspondence
 
 # The fundamental OEIS A000081 sequence
 const A000081_SEQUENCE = [
@@ -388,6 +419,75 @@ function explain_parameters(reservoir_size::Int, max_tree_order::Int, num_membra
     
     println("="^70)
     println()
+end
+
+"""
+    validate_component_correspondence(order::Int, 
+                                     num_bseries_roots::Int, 
+                                     num_psystem_membranes::Int, 
+                                     num_jsurface_diffs::Int)
+
+Validate the 1-1 correspondence principle for a given order.
+
+For order n, the following must all equal A000081[n]:
+- Number of B-series roots (rooted trees)
+- Number of P-system membranes (at order n)
+- Number of J-surface differentials (elementary differentials)
+
+This ensures the three expressions of A000081 (Matula numbers) are consistent.
+
+# Arguments
+- `order::Int`: The order being validated
+- `num_bseries_roots::Int`: Number of B-series rooted trees at this order
+- `num_psystem_membranes::Int`: Number of P-system membranes at this order
+- `num_jsurface_diffs::Int`: Number of J-surface elementary differentials at this order
+
+# Returns
+- `Tuple{Bool, String}`: (is_valid, message)
+
+# Example
+```julia
+# For order 5, all three should equal 9
+is_valid, msg = validate_component_correspondence(5, 9, 9, 9)
+# Returns: (true, "✓ 1-1 correspondence validated...")
+
+# Invalid case
+is_valid, msg = validate_component_correspondence(5, 9, 8, 9)
+# Returns: (false, "✗ P-system membranes (8) ≠ A000081[5] (9)")
+```
+"""
+function validate_component_correspondence(order::Int, 
+                                          num_bseries_roots::Int, 
+                                          num_psystem_membranes::Int, 
+                                          num_jsurface_diffs::Int)
+    if order < 1 || order > length(A000081_SEQUENCE)
+        return (false, "Order $order out of range [1, $(length(A000081_SEQUENCE))]")
+    end
+    
+    expected = A000081_SEQUENCE[order]
+    errors = String[]
+    
+    if num_bseries_roots != expected
+        push!(errors, "B-series roots ($num_bseries_roots) ≠ A000081[$order] ($expected)")
+    end
+    
+    if num_psystem_membranes != expected
+        push!(errors, "P-system membranes ($num_psystem_membranes) ≠ A000081[$order] ($expected)")
+    end
+    
+    if num_jsurface_diffs != expected
+        push!(errors, "J-surface differentials ($num_jsurface_diffs) ≠ A000081[$order] ($expected)")
+    end
+    
+    if isempty(errors)
+        msg = "✓ 1-1 correspondence validated for order $order: " *
+              "roots=$num_bseries_roots, membranes=$num_psystem_membranes, " *
+              "diffs=$num_jsurface_diffs = A000081[$order]"
+        return (true, msg)
+    else
+        msg = "✗ 1-1 correspondence FAILED for order $order:\n  " * join(errors, "\n  ")
+        return (false, msg)
+    end
 end
 
 end # module A000081Parameters

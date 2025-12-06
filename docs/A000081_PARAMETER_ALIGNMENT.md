@@ -20,6 +20,50 @@ This sequence serves as the **ontogenetic generator** for the entire Deep Tree E
 - **Enumeration basis**: Count of elementary differentials in B-series
 - **Growth pattern**: Natural expansion rates for self-organization
 
+## The 1-1 Correspondence Principle (CRITICAL)
+
+For any given order n, the system maintains a **1-1 relationship** between three expressions of A000081:
+
+1. **B-series roots** (rooted trees) = A000081[n]
+2. **P-system membranes** (at order n) = A000081[n]
+3. **J-surface differentials** (elementary differentials) = A000081[n]
+
+These three counts MUST be equal for mathematical consistency. This is known as the **Matula number correspondence**.
+
+### Reference Table
+
+| Order | Reservoir Size* | Roots | Membranes | Differentials |
+|-------|-----------------|-------|-----------|---------------|
+| 1     | 1               | 1     | 1         | 1             |
+| 2     | 2               | 1     | 1         | 1             |
+| 3     | 4               | 2     | 2         | 2             |
+| 4     | 8               | 4     | 4         | 4             |
+| 5     | 17              | 9     | 9         | 9             |
+| 6     | 37              | 20    | 20        | 20            |
+| 7     | 85              | 48    | 48        | 48            |
+| 8     | 200             | 115   | 115       | 115           |
+| 9     | 486             | 286   | 286       | 286           |
+| 10    | 1205            | 719   | 719       | 719           |
+
+*Reservoir Size = cumulative sum of A000081[1:n]
+
+### Validation
+
+Use `validate_component_correspondence()` to ensure the 1-1 relationship holds:
+
+```julia
+using DeepTreeEcho.A000081Parameters
+
+# Validate order 5 components
+is_valid, msg = validate_component_correspondence(
+    5,  # order
+    9,  # num B-series roots
+    9,  # num P-system membranes  
+    9   # num J-surface differentials
+)
+# Returns: (true, "✓ 1-1 correspondence validated...")
+```
+
 ## Parameter Derivation Rules
 
 ### 1. Reservoir Size

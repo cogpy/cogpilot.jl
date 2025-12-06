@@ -82,9 +82,18 @@ Random.seed!(42)
         is_valid, msg = validate_parameters(100, 8, 3, 0.1, 0.05)
         @test !is_valid
         
+        # Test 1-1 correspondence validation
+        is_valid_corr, msg_corr = validate_component_correspondence(5, 9, 9, 9)
+        @test is_valid_corr
+        
+        # Test invalid correspondence
+        is_valid_corr2, msg_corr2 = validate_component_correspondence(5, 9, 8, 9)
+        @test !is_valid_corr2
+        
         println("  ✓ A000081 sequence correct")
         println("  ✓ Parameter derivation functional")
         println("  ✓ Validation working")
+        println("  ✓ 1-1 correspondence validation working")
     end
     
     @testset "1. Ontogenetic Engine" begin

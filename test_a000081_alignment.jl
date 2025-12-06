@@ -85,7 +85,7 @@ end
 println()
 
 # Test 4: Parameter validation
-println("[4/5] Testing parameter validation...")
+println("[4/6] Testing parameter validation...")
 try
     # Valid parameters
     is_valid, msg = validate_parameters(17, 8, 4, 20/9, 1/9)
@@ -103,8 +103,35 @@ catch e
 end
 println()
 
-# Test 5: Integration test (if DeepTreeEcho is available)
-println("[5/5] Testing DeepTreeEcho integration...")
+# Test 5: 1-1 Correspondence validation
+println("[5/6] Testing 1-1 correspondence validation...")
+try
+    # Valid correspondence (order 5: all should be 9)
+    is_valid, msg = validate_component_correspondence(5, 9, 9, 9)
+    @assert is_valid "Valid correspondence should pass"
+    println("✓ Valid 1-1 correspondence: $msg")
+    
+    # Invalid correspondence (membranes mismatch)
+    is_valid, msg = validate_component_correspondence(5, 9, 8, 9)
+    @assert !is_valid "Invalid correspondence should fail"
+    println("✓ Invalid correspondence detected:")
+    println("  $(split(msg, "\n")[2])")
+    
+    # Test multiple orders
+    for order in [1, 3, 4, 6]
+        expected = A000081_SEQUENCE[order]
+        is_valid, _ = validate_component_correspondence(order, expected, expected, expected)
+        @assert is_valid "Order $order should validate with count=$expected"
+    end
+    println("✓ Multiple order validations passed")
+catch e
+    println("✗ 1-1 correspondence test failed: $e")
+    exit(1)
+end
+println()
+
+# Test 6: Integration test (if DeepTreeEcho is available)
+println("[6/6] Testing DeepTreeEcho integration...")
 try
     # Try to load DeepTreeEcho
     include("src/DeepTreeEcho/DeepTreeEcho.jl")
@@ -129,12 +156,18 @@ println("✓ A000081Parameters module is functional")
 println("✓ Parameter derivation produces correct values")
 println("✓ Parameter sets can be created")
 println("✓ Validation correctly identifies alignment")
+println("✓ 1-1 correspondence validation working")
 println()
 println("All core parameter alignment features are working correctly!")
+println()
+println("Key insight: For order n, the system maintains 1-1 relationships:")
+println("  • B-series roots = A000081[n]")
+println("  • P-system membranes = A000081[n]")
+println("  • J-surface differentials = A000081[n]")
 println()
 println("Next steps:")
 println("  1. Run: julia examples/deep_tree_echo_demo.jl")
 println("  2. Run: julia test/test_deep_tree_echo.jl")
-println("  3. Check that all systems use A000081-derived parameters")
+println("  3. Ensure all systems maintain 1-1 correspondence")
 println()
 println("="^70)

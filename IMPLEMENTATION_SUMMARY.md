@@ -26,12 +26,34 @@ a:  1   1   2   4   9   20   48   115    286    719   1842   4766
 - `derive_mutation_rate(base_order)` → Inverse of tree count
 - `get_parameter_set(base_order)` → Complete validated parameter set
 - `validate_parameters(...)` → Check alignment with A000081
+- `validate_component_correspondence(...)` → Verify 1-1 relationships
 - `explain_parameters(...)` → Human-readable explanations
+
+**The 1-1 Correspondence Principle (Critical)**:
+
+For any order n, the system maintains 1-1 relationships between:
+- **B-series roots** (rooted trees) = A000081[n]
+- **P-system membranes** (at order n) = A000081[n]
+- **J-surface differentials** (elementary differentials) = A000081[n]
+
+Reference table:
+| Order | Reservoir Size | Roots/Mems/Diffs |
+|-------|----------------|------------------|
+| 1     | 1              | 1                |
+| 2     | 2              | 1                |
+| 3     | 4              | 2                |
+| 4     | 8              | 4                |
+| 5     | 17             | 9                |
+| 6     | 37             | 20               |
+| 7     | 85             | 48               |
+| 8     | 200            | 115              |
+| 9     | 486            | 286              |
+| 10    | 1205           | 719              |
 
 **Derivation Rules**:
 ```julia
-reservoir_size = sum(A000081[1:base_order])
-num_membranes = A000081[membrane_order]
+reservoir_size = sum(A000081[1:base_order])  # Cumulative
+num_membranes = A000081[membrane_order]      # Direct value
 growth_rate = A000081[base_order + 1] / A000081[base_order]
 mutation_rate = 1.0 / A000081[base_order]
 max_tree_order = base_order + offset
