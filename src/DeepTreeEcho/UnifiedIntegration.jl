@@ -107,18 +107,37 @@ mutable struct UnifiedReactorCore
     config::Dict{String, Any}
     
     function UnifiedReactorCore(;
-        max_tree_order::Int=8,
-        reservoir_size::Int=100,
-        num_membranes::Int=3,
-        symplectic::Bool=true)
+        max_tree_order::Union{Int,Nothing}=nothing,
+        reservoir_size::Union{Int,Nothing}=nothing,
+        num_membranes::Union{Int,Nothing}=nothing,
+        symplectic::Bool=true,
+        base_order::Int=5)
+        
+        # Load parameter module
+        include("A000081Parameters.jl")
+        using .A000081Parameters
+        
+        # Derive parameters from A000081
+        params = A000081Parameters.get_parameter_set(base_order, membrane_order=4)
+        
+        max_tree_order = isnothing(max_tree_order) ? params.max_tree_order : max_tree_order
+        reservoir_size = isnothing(reservoir_size) ? params.reservoir_size : reservoir_size
+        num_membranes = isnothing(num_membranes) ? params.num_membranes : num_membranes
         
         config = Dict{String, Any}(
             "max_tree_order" => max_tree_order,
             "reservoir_size" => reservoir_size,
             "num_membranes" => num_membranes,
             "symplectic" => symplectic,
+            "base_order" => base_order,
+            "a000081_aligned" => true,
             "integration_status" => get_integration_status()
         )
+        
+        println("🌳 UnifiedReactorCore with A000081-aligned parameters:")
+        println("  max_tree_order = $max_tree_order")
+        println("  reservoir_size = $reservoir_size")
+        println("  num_membranes = $num_membranes")
         
         # Initialize rooted trees from A000081
         rooted_trees = initialize_rooted_trees(max_tree_order)

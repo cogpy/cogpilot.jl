@@ -41,42 +41,57 @@ end
 
 """
     initialize_reservoir_population(;
-        population_size::Int = 20,
-        order::Int = 4,
-        membrane_depth::Int = 3,
-        reservoir_size::Int = 100
+        population_size::Union{Int,Nothing} = nothing,
+        order::Union{Int,Nothing} = nothing,
+        membrane_depth::Union{Int,Nothing} = nothing,
+        reservoir_size::Union{Int,Nothing} = nothing,
+        base_order::Int = 5
     ) -> ReservoirPopulation
 
-Initialize a population of Deep Tree Echo reservoirs.
+Initialize a population of Deep Tree Echo reservoirs with A000081-aligned parameters.
 
 # Arguments
-- `population_size::Int`: Number of individuals
-- `order::Int`: B-series order
-- `membrane_depth::Int`: Membrane hierarchy depth
-- `reservoir_size::Int`: Reservoir size per membrane
+- `population_size::Union{Int,Nothing}`: Number of individuals (auto-derived if nothing)
+- `order::Union{Int,Nothing}`: B-series order (auto-derived if nothing)
+- `membrane_depth::Union{Int,Nothing}`: Membrane hierarchy depth (auto-derived if nothing)
+- `reservoir_size::Union{Int,Nothing}`: Reservoir size per membrane (auto-derived if nothing)
+- `base_order::Int`: Base order for A000081 derivation (default: 5)
 
 # Returns
-- `ReservoirPopulation`: Initialized population
+- `ReservoirPopulation`: Initialized population with A000081-aligned parameters
 
 # Examples
 ```julia
+# Auto-derive all parameters
+population = initialize_reservoir_population(base_order=5)
+
+# Specify population size, auto-derive others
 population = initialize_reservoir_population(
-    population_size = 20,
-    order = 4
+    population_size = 9,  # A000081[5]
+    base_order = 5
 )
 ```
 """
 function initialize_reservoir_population(;
-    population_size::Int = 20,
-    order::Int = 4,
-    membrane_depth::Int = 3,
-    reservoir_size::Int = 100
+    population_size::Union{Int,Nothing} = nothing,
+    order::Union{Int,Nothing} = nothing,
+    membrane_depth::Union{Int,Nothing} = nothing,
+    reservoir_size::Union{Int,Nothing} = nothing,
+    base_order::Int = 5
 )
+    # Load parameter module
+    include("A000081Parameters.jl")
+    using .A000081Parameters
+    
+    # Derive population size from A000081[4] = 4 if not provided
+    population_size = isnothing(population_size) ? A000081Parameters.A000081_SEQUENCE[4] : population_size
+    
     individuals = [
         initialize_deep_tree_echo(
             order = order,
             membrane_depth = membrane_depth,
-            reservoir_size = reservoir_size
+            reservoir_size = reservoir_size,
+            base_order = base_order
         )
         for _ in 1:population_size
     ]
@@ -265,25 +280,27 @@ end
 
 """
     run_evolution(;
-        population_size::Int = 20,
+        population_size::Union{Int,Nothing} = nothing,
         max_generations::Int = 100,
-        order::Int = 4,
-        membrane_depth::Int = 3,
-        reservoir_size::Int = 100,
+        order::Union{Int,Nothing} = nothing,
+        membrane_depth::Union{Int,Nothing} = nothing,
+        reservoir_size::Union{Int,Nothing} = nothing,
+        base_order::Int = 5,
         fitness_function::Function = evaluate_fitness,
         test_problems::Vector{<:Any} = Any[],
         convergence_threshold::Float64 = 0.95,
         verbose::Bool = true
     ) -> ReservoirPopulation
 
-Run evolutionary optimization of reservoir population.
+Run evolutionary optimization of reservoir population with A000081-aligned parameters.
 
 # Arguments
-- `population_size::Int`: Population size
+- `population_size::Union{Int,Nothing}`: Population size (auto-derived if nothing)
 - `max_generations::Int`: Maximum generations
-- `order::Int`: B-series order
-- `membrane_depth::Int`: Membrane hierarchy depth
-- `reservoir_size::Int`: Reservoir size
+- `order::Union{Int,Nothing}`: B-series order (auto-derived if nothing)
+- `membrane_depth::Union{Int,Nothing}`: Membrane hierarchy depth (auto-derived if nothing)
+- `reservoir_size::Union{Int,Nothing}`: Reservoir size (auto-derived if nothing)
+- `base_order::Int`: Base order for A000081 derivation (default: 5)
 - `fitness_function::Function`: Fitness evaluation function
 - `test_problems::Vector`: Test problems
 - `convergence_threshold::Float64`: Fitness threshold for early stopping
@@ -294,34 +311,42 @@ Run evolutionary optimization of reservoir population.
 
 # Examples
 ```julia
+# Auto-derive all parameters from A000081
+population = run_evolution(base_order=5, max_generations=100)
+
+# Specify some parameters
 population = run_evolution(
-    population_size = 20,
+    population_size = 9,  # A000081[5]
     max_generations = 100,
     verbose = true
 )
 ```
 """
 function run_evolution(;
-    population_size::Int = 20,
+    population_size::Union{Int,Nothing} = nothing,
     max_generations::Int = 100,
-    order::Int = 4,
-    membrane_depth::Int = 3,
-    reservoir_size::Int = 100,
+    order::Union{Int,Nothing} = nothing,
+    membrane_depth::Union{Int,Nothing} = nothing,
+    reservoir_size::Union{Int,Nothing} = nothing,
+    base_order::Int = 5,
     fitness_function::Function = evaluate_fitness,
     test_problems::Vector{<:Any} = Any[],
     convergence_threshold::Float64 = 0.95,
     verbose::Bool = true
 )
-    # Initialize population
+    # Initialize population with A000081-derived parameters
     population = initialize_reservoir_population(
         population_size = population_size,
         order = order,
         membrane_depth = membrane_depth,
-        reservoir_size = reservoir_size
+        reservoir_size = reservoir_size,
+        base_order = base_order
     )
     
+    actual_pop_size = length(population.individuals)
+    
     if verbose
-        println("Initialized population of $population_size reservoirs")
+        println("Initialized population of $actual_pop_size reservoirs (A000081-aligned)")
         println("B-series order: $order")
         println("Membrane depth: $membrane_depth")
         println("Reservoir size: $reservoir_size")

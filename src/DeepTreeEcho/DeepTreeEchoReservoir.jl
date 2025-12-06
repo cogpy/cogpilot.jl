@@ -54,38 +54,63 @@ end
 
 """
     initialize_deep_tree_echo(;
-        order::Int = 4,
-        membrane_depth::Int = 3,
-        reservoir_size::Int = 100,
-        branching_factor::Int = 2
+        order::Union{Int,Nothing} = nothing,
+        membrane_depth::Union{Int,Nothing} = nothing,
+        reservoir_size::Union{Int,Nothing} = nothing,
+        branching_factor::Union{Int,Nothing} = nothing,
+        base_order::Int = 5
     ) -> DeepTreeEchoReservoir
 
-Initialize a Deep Tree Echo Reservoir from parameters.
+Initialize a Deep Tree Echo Reservoir with A000081-derived parameters.
 
 # Arguments
-- `order::Int`: Maximum order of B-series (rooted trees)
-- `membrane_depth::Int`: Depth of membrane hierarchy
-- `reservoir_size::Int`: Size of each reservoir
-- `branching_factor::Int`: Number of children per membrane
+- `order::Union{Int,Nothing}`: Maximum order of B-series (auto-derived if nothing)
+- `membrane_depth::Union{Int,Nothing}`: Depth of membrane hierarchy (auto-derived if nothing)
+- `reservoir_size::Union{Int,Nothing}`: Size of each reservoir (auto-derived if nothing)
+- `branching_factor::Union{Int,Nothing}`: Number of children per membrane (auto-derived if nothing)
+- `base_order::Int`: Base order for A000081 derivation (default: 5)
 
 # Returns
-- `DeepTreeEchoReservoir`: Initialized reservoir
+- `DeepTreeEchoReservoir`: Initialized reservoir with A000081-aligned parameters
 
 # Examples
 ```julia
+# Auto-derive all parameters from A000081
+reservoir = initialize_deep_tree_echo(base_order=5)
+
+# Explicitly provide some parameters
 reservoir = initialize_deep_tree_echo(
-    order = 4,
-    membrane_depth = 3,
-    reservoir_size = 100
+    order = 8,
+    reservoir_size = 17  # A000081-aligned
 )
 ```
 """
 function initialize_deep_tree_echo(;
-    order::Int = 4,
-    membrane_depth::Int = 3,
-    reservoir_size::Int = 100,
-    branching_factor::Int = 2
+    order::Union{Int,Nothing} = nothing,
+    membrane_depth::Union{Int,Nothing} = nothing,
+    reservoir_size::Union{Int,Nothing} = nothing,
+    branching_factor::Union{Int,Nothing} = nothing,
+    base_order::Int = 5
 )
+    # Load parameter module
+    include("A000081Parameters.jl")
+    using .A000081Parameters
+    
+    # Derive parameters from A000081
+    params = A000081Parameters.get_parameter_set(base_order, membrane_order=3)
+    
+    order = isnothing(order) ? params.max_tree_order : order
+    reservoir_size = isnothing(reservoir_size) ? params.reservoir_size : reservoir_size
+    membrane_depth = isnothing(membrane_depth) ? params.num_membranes : membrane_depth
+    # Branching factor from A000081[3] = 2
+    branching_factor = isnothing(branching_factor) ? A000081Parameters.A000081_SEQUENCE[3] : branching_factor
+    
+    println("🌳 A000081-aligned parameters:")
+    println("  order = $order")
+    println("  reservoir_size = $reservoir_size")
+    println("  membrane_depth = $membrane_depth")
+    println("  branching_factor = $branching_factor")
+    
     # 1. Generate rooted trees up to order (OEIS A000081)
     rooted_trees = RootedTree[]
     for o in 1:order
