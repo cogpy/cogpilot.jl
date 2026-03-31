@@ -16,14 +16,41 @@
 #ifndef COG_HPP
 #define COG_HPP
 
+// Core and Pilot are always available in this repo
 #include "core/core.hpp"
-#include "plan9/plan9.hpp"
 #include "pilot/pilot.hpp"
+
+// Optional modules — include only if their headers are present.
+// Each module lives in its own cogpy/* repo and may not be installed.
+#if __has_include("plan9/plan9.hpp")
+#include "plan9/plan9.hpp"
+#endif
+
+#if __has_include("mach/mach.hpp")
 #include "mach/mach.hpp"
+#endif
+
+#if __has_include("lux/lux.hpp")
 #include "lux/lux.hpp"
+#endif
+
+#if __has_include("glow/glow.hpp")
 #include "glow/glow.hpp"
+#endif
+
+#if __has_include("gml/gml.hpp")
 #include "gml/gml.hpp"
+#endif
+
+#if __has_include("prime/prime.hpp")
 #include "prime/prime.hpp"
+#endif
+
+#if __has_include("webvm/webvm.hpp")
 #include "webvm/webvm.hpp"
+#endif
+
+// Ternary quotient log(2)/log(3) constants
+#include "tq_log2_3.hpp"
 
 #endif // COG_HPP
